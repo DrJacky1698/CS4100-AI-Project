@@ -3,7 +3,7 @@ import chess.polyglot
 from copy import deepcopy
 
 #Adding an opening book to compensate for the lack of depth the Min Max has
-reader = chess.polyglot.open_reader('Util/baron343-x64.exe')
+#reader = chess.polyglot.open_reader('Util/baron343-x64.exe')
 
 scoring= {'p': -1,
           'n': -3,
@@ -45,12 +45,12 @@ def eval_space(BOARD):
 
 def min_maxN(BOARD,N):
 
-    #if move is found, return it as best move
+    '''#if move is found, return it as best move
     opening_move = reader.get(BOARD)
     if opening_move == None:
         pass
     else:
-        return opening_move.move
+        return opening_move.move'''
 
 
     #The setting of letting game end not only gain more value
