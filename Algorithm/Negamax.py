@@ -30,13 +30,6 @@ class NegaMax:
                 break
         return max_value
 
-    def evaluate(self, board):
-        # Simple evaluation function based on material
-        score = 0
-        for piece_type in self.scoring:
-            score += len(board.pieces(piece_type, chess.WHITE)) * self.scoring[piece_type]
-            score -= len(board.pieces(piece_type, chess.BLACK)) * self.scoring[piece_type]
-        return score
 
     def select_move(self, board, depth):
         best_move = None

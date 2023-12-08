@@ -1,37 +1,45 @@
 import chess
 import chess.engine
 
+'''All evaluation functions take in a "player" parameter and return a positive number corresponding to how good
+ that player's position is. If you need to compare it to the position of the other player or to find out
+  which player currently has an advantage, call the evaluation function being used twice, once for each player's
+   perspective and then compare them.'''
 
-scoring= {'p': -1,
-          'n': -3,
-          'b': -3,
-          'r': -5,
-          'q': -9,
-          'k': 0,
-          'P': 1,
-          'N': 3,
-          'B': 3,
-          'R': 5,
-          'Q': 9,
-          'K': 0,
-          }
 
-#simple evaluation function,
-def simple_material_evaluator(BOARD):
+#simple evaluation function which improves on the one from the tutorial we found in minmax.py by making a bishop
+# worth slightly more than a knight, and also giving the king a value to encourage capturing the king for a checkmate.
+#https://www.chessprogramming.org/Simplified_Evaluation_Function
+def simple_material_evaluator(BOARD, player='white'):
+    scoring = {'P': 100,
+               'N': 320,
+               'B': 330,
+               'R': 500,
+               'Q': 900,
+               'K': 20000,
+               }
+
     score = 0
     pieces = BOARD.piece_map()
     for key in pieces:
-        score += scoring[str(pieces[key])]
+        if str(pieces[key]).isupper() and player == 'white':
+            score += scoring[str(pieces[key])]
+        elif str(pieces[key]).islower() and player == 'black':
+            score += scoring[str(pieces[key]).upper()]
 
     return score
 
 
 #uses stockfish's evaluator in order to test our algorithms with a known good evaluator
 #https://stackoverflow.com/questions/58556338/python-evaluating-a-board-position-using-stockfish-from-the-python-chess-librar
-def stockfish_evaluator(BOARD):
-    engine = chess.engine.SimpleEngine.popen_uci("stockfish_10_x64")
+def stockfish_evaluator(BOARD, player='white'):
+    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
     result = engine.analyse(BOARD, chess.engine.Limit(time=0.01))
-    return result['score']
+    if player == 'white':
+        return result['score'].white()
+    else:
+        return result['score'].black()
+
 
 
 
@@ -40,7 +48,7 @@ def stockfish_evaluator(BOARD):
 It works by using Piece-Square tables, which assign specific values for each square on the board per piece type. We then
 combine the values across all pieces at their current positions to evaluate the total value for the position. 
 The Piece-Square tables originat here: https://www.chessprogramming.org/Simplified_Evaluation_Function'''
-def basic_piece_squares_evaluator(BOARD):
+def basic_piece_squares_evaluator(BOARD, player='white'):
     pawn = [ 0,  0,  0,  0,  0,  0,  0,  0,
             50, 50, 50, 50, 50, 50, 50, 50,
             10, 10, 20, 30, 30, 20, 10, 10,
@@ -140,4 +148,7 @@ def basic_piece_squares_evaluator(BOARD):
         return score
 
 
+'''print(simple_material_evaluator(0, player='white'))
 
+fen = "1rk5/8/8/8/8/6P1/5B2/5P2"
+   BOARD = chess.Board(fen)'''
