@@ -4,7 +4,7 @@ import math
 
 from ChessEngine import chess_visuals as chess_visuals
 from Algorithm.MinMax import play_min_maxN
-
+from Algorithm.Negamax import play_nega_max
 
 scrn = chess_visuals.scrn
 board = chess_visuals.board
@@ -267,4 +267,5 @@ def main_two_agent(BOARD,agent1,agent_color1,agent2):
 #     else:
 #         print("Unknown game mode.")
 
-main_two_agent(board, play_min_maxN, False, play_min_maxN)
+# main_two_agent(board, play_min_maxN, False, play_min_maxN)
+main_two_agent(board, play_nega_max, False, play_nega_max)
