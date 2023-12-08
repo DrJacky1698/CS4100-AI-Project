@@ -44,14 +44,6 @@ def eval_space(BOARD):
 
 def min_maxN(BOARD,N):
     #The setting of letting game end not only gain more value
-
-    pieces = BOARD.piece_map()
-    print("pieces", pieces)
-    print(pieces[40])
-    for key in pieces:
-        pass
-        #print(key)
-        #score += scoring[str(pieces[key])]
     
     #generate list of possible moves
     moves = list(BOARD.legal_moves)
