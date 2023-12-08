@@ -1,6 +1,7 @@
 import sys
 import pygame
 import math
+import argparse
 
 from ChessEngine import chess_visuals as chess_visuals
 from Algorithm.MinMax import play_min_maxN
@@ -232,41 +233,35 @@ def main_two_agent(BOARD,agent1,agent_color1,agent2):
             print(BOARD)
     pygame.quit()
 
-# def main(game_mode, board, agent=None, agent_color=None, second_agent=None):
-#     '''
-#     Initialize the game based on the game mode.
-#     :param game_mode: A string indicating the game mode ('human', 'one_agent', 'two_agents')
-#     :param board: The chess board to be used
-#     :param agent: The agent function for one player or the first agent in two agents mode
-#     :param agent_color: The color for the agent ('white' or 'black')
-#     :param second_agent: The second agent function for two agents mode
-#     '''
-#     if game_mode == 'human':
-#         main_human_vs_human(board)
-#     elif game_mode == 'one_agent' and agent is not None:
-#         main_one_agent(board, agent, agent_color)
-#     elif game_mode == 'two_agents' and agent is not None and second_agent is not None:
-#         main_two_agent(board, agent, agent_color, second_agent)
 
-# if __name__ == "__main__":
-#     # Example usage:
-#     # python main.py human
-#     # python main.py one_agent white
-#     # python main.py two_agents
+def main():
+    parser = argparse.ArgumentParser(description="Chess game modes and AI options")
+    parser.add_argument("mode", nargs='?', default='two_agents', help="Game mode: 'human', 'one_agent', or 'two_agents'")
+    parser.add_argument("--agent1", help="First AI agent: 'min_max' or 'nega_max'", default="min_max")
+    parser.add_argument("--agent2", help="Second AI agent: 'min_max' or 'nega_max' (only for two_agents mode)", default="min_max")
+    parser.add_argument("--agent_color", help="AI agent color: 'white' or 'black' (only for one_agent mode)", default="white")
+    args = parser.parse_args()
 
-#     game_mode = sys.argv[1] if len(sys.argv) > 1 else 'human'
-#     agent_color = sys.argv[2] if len(sys.argv) > 2 else 'white'
 
-#     # Start the game
-#     if game_mode == 'human':
-#         main(game_mode, board)
-#     elif game_mode == 'one_agent':
-#         main(game_mode, board, agent=example_agent, agent_color=agent_color)
-#     elif game_mode == 'two_agents':
-#         main(game_mode, board, agent=example_agent, agent_color=agent_color, second_agent=example_agent)
-#     else:
-#         print("Unknown game mode.")
+    pygame.init()
+    board = chess_visuals.board
 
-# main_two_agent(board, play_min_maxN, False, play_min_maxN)
-main_two_agent(board, play_nega_max, False, play_nega_max)
-#Hi simon
+    agent_mapping = {
+        "min_max": play_min_maxN,
+        "nega_max": play_nega_max
+    }
+
+    # Convert agent_color to boolean
+    agent_color_bool = args.agent_color.lower() == 'white'
+
+    if args.mode == 'human':
+        main_human_vs_human(board)
+    elif args.mode == 'one_agent':
+        main_one_agent(board, agent_mapping[args.agent1], agent_color_bool)
+    elif args.mode == 'two_agents':
+        main_two_agent(board, agent_mapping[args.agent1], True, agent_mapping[args.agent2])
+    else:
+        print("Invalid game mode. Please choose 'human', 'one_agent', or 'two_agents'.")
+
+if __name__ == "__main__":
+    main()
