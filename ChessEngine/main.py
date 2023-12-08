@@ -268,3 +268,4 @@ def main_two_agent(BOARD,agent1,agent_color1,agent2):
 #         print("Unknown game mode.")
 
 main_two_agent(board, play_min_maxN, False, play_min_maxN)
+main_two_agent(board, play_nega_max, False, play_nega_max)
