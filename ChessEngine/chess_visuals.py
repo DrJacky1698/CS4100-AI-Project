@@ -19,18 +19,18 @@ BLACK = (0, 0, 0)
 board = chess.Board()
 
 #load piece images
-pieces = {'p': pygame.image.load('Images/b-pawn.png').convert(),
-          'n': pygame.image.load('Images/b-knight.png').convert(),
-          'b': pygame.image.load('Images/b-bishop.png').convert(),
-          'r': pygame.image.load('Images/b-rook.png').convert(),
-          'q': pygame.image.load('Images/b-queen.png').convert(),
-          'k': pygame.image.load('Images/b-king.png').convert(),
-          'P': pygame.image.load('Images/w-pawn.png').convert(),
-          'N': pygame.image.load('Images/w-knight.png').convert(),
-          'B': pygame.image.load('Images/w-bishop.png').convert(),
-          'R': pygame.image.load('Images/w-rook.png').convert(),
-          'Q': pygame.image.load('Images/w-queen.png').convert(),
-          'K': pygame.image.load('Images/w-king.png').convert(),
+pieces = {'p': pygame.image.load('ChessEngine/Images/b-pawn.png').convert(),
+          'n': pygame.image.load('ChessEngine/Images/b-knight.png').convert(),
+          'b': pygame.image.load('ChessEngine/Images/b-bishop.png').convert(),
+          'r': pygame.image.load('ChessEngine/Images/b-rook.png').convert(),
+          'q': pygame.image.load('ChessEngine/Images/b-queen.png').convert(),
+          'k': pygame.image.load('ChessEngine/Images/b-king.png').convert(),
+          'P': pygame.image.load('ChessEngine/Images/w-pawn.png').convert(),
+          'N': pygame.image.load('ChessEngine/Images/w-knight.png').convert(),
+          'B': pygame.image.load('ChessEngine/Images/w-bishop.png').convert(),
+          'R': pygame.image.load('ChessEngine/Images/w-rook.png').convert(),
+          'Q': pygame.image.load('ChessEngine/Images/w-queen.png').convert(),
+          'K': pygame.image.load('ChessEngine/Images/w-king.png').convert(),
           
           }
 
