@@ -2,101 +2,53 @@ import chess
 import chess.polyglot
 from copy import deepcopy
 
+class MinMax:
+    def __init__(self):
+        self.scoring = {
+            'p': -1, 'n': -3, 'b': -3, 'r': -5, 'q': -9, 'k': 0,
+            'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 0,
+        }
 
+    def evaluate_board(self, board):
+        score = 0
+        pieces = board.piece_map()
+        for key in pieces:
+            score += self.scoring[str(pieces[key])]
+        return score
 
-scoring= {'p': -1,
-          'n': -3,
-          'b': -3,
-          'r': -5,
-          'q': -9,
-          'k': 0,
-          'P': 1,
-          'N': 3,
-          'B': 3,
-          'R': 5,
-          'Q': 9,
-          'K': 0,
-          }
+    def evaluate_space(self, board):
+        no_moves = len(list(board.legal_moves))
+        value = no_moves / (20 + no_moves)
+        return value if board.turn else -value
 
-#simple evaluation function
-def eval_board(BOARD):
-    score = 0
-    pieces = BOARD.piece_map()
-    for key in pieces:
-        score += scoring[str(pieces[key])]
+    def min_max(self, board, depth):
+        if depth == 0 or board.is_game_over():
+            return self.evaluate_board(board) + self.evaluate_space(board), None
 
-    return score
+        moves = list(board.legal_moves)
+        best_score = float('-inf') if board.turn else float('inf')
+        best_move = None
 
-# secondary evaluation function
-def eval_space(BOARD):
-    no_moves = len(list(BOARD.legal_moves))
+        for move in moves:
+            temp_board = deepcopy(board)
+            temp_board.push(move)
+            score, _ = self.min_max(temp_board, depth - 1)
 
-    #this function is always between 0 and 1 so we will never evaluate
-    #this as being greater than a pawns value. The 20 value is arbitrary
-    #but this number is chosen as it centers value around 0.5
-    value = (no_moves/(20+no_moves))
-    
-    if BOARD.turn == True:
-        return value
-    else:
-        return -value
-
-
-def min_maxN(BOARD,N):
-    #The setting of letting game end not only gain more value
-    
-    #generate list of possible moves
-    moves = list(BOARD.legal_moves)
-    scores = []
-
-    #score each move
-    for move in moves:
-        #temp allows us to leave the original game state unchanged
-        temp = deepcopy(BOARD)
-        temp.push(move)
-
-        #here we must check that the game is not over
-        outcome = temp.outcome()
-        
-        #if checkmate
-        if outcome == None:
-            #if we have not got to the final depth
-            #we search more moves ahead
-            if N > 1:
-                temp_best_move = min_maxN(temp,N-1)
-                temp.push(temp_best_move)
-
-            scores.append(eval_board(temp))
-
-        #if checkmate
-        elif temp.is_checkmate():
-
-            # we return this as best move as it is checkmate
-            return move
-
-        # if stalemate
-        else:
-            #value to disencourage a draw
-            #the higher the less likely to draw
-            #default value should be 0
-            #we often pick 0.1 to get the bot out of loops in bot vs bot
-            val = 1000
-            if BOARD.turn == True:
-                scores.append(-val)
+            if board.turn:
+                if score > best_score:
+                    best_score = score
+                    best_move = move
             else:
-                scores.append(val)
+                if score < best_score:
+                    best_score = score
+                    best_move = move
 
-        #this is the secondary eval function
-        scores[-1] = scores[-1] + eval_space(temp)
+        return best_score, best_move
 
-    if BOARD.turn == True:
-        best_move = moves[scores.index(max(scores))]
-    else:
-        best_move = moves[scores.index(min(scores))]
+    def select_move(self, board, depth=3):
+        _, best_move = self.min_max(board, depth)
+        return best_move
 
-    return best_move
-        
-# a simple wrapper function as the display only gives one imput , BOARD
-def play_min_maxN(BOARD):
-    N=3
-    return min_maxN(BOARD,N)
+def play_min_max(board):
+    minmax = MinMax()
+    return minmax.select_move(board)
