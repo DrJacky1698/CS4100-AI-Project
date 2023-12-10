@@ -4,7 +4,7 @@ import math
 import argparse
 
 from ChessEngine import chess_visuals as chess_visuals
-from Algorithm.MinMax import play_min_maxN
+from Algorithm.MinMax import play_min_max
 from Algorithm.Negamax import play_nega_max
 
 scrn = chess_visuals.scrn
@@ -247,7 +247,7 @@ def main():
     board = chess_visuals.board
 
     agent_mapping = {
-        "min_max": play_min_maxN,
+        "min_max": play_min_max,
         "nega_max": play_nega_max
     }
 
