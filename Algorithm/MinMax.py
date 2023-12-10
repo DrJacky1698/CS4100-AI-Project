@@ -1,29 +1,15 @@
 import chess
-import chess.polyglot
+import chess.engine
+from Algorithm.EvaluationFunctions import simple_material_evaluator
 from copy import deepcopy
 
 class MinMax:
-    def __init__(self):
-        self.scoring = {
-            'p': -1, 'n': -3, 'b': -3, 'r': -5, 'q': -9, 'k': 0,
-            'P': 1, 'N': 3, 'B': 3, 'R': 5, 'Q': 9, 'K': 0,
-        }
-
-    def evaluate_board(self, board):
-        score = 0
-        pieces = board.piece_map()
-        for key in pieces:
-            score += self.scoring[str(pieces[key])]
-        return score
-
-    def evaluate_space(self, board):
-        no_moves = len(list(board.legal_moves))
-        value = no_moves / (20 + no_moves)
-        return value if board.turn else -value
+    def __init__(self, evaluation_function):
+        self.evaluation_function = evaluation_function
 
     def min_max(self, board, depth):
         if depth == 0 or board.is_game_over():
-            return self.evaluate_board(board) + self.evaluate_space(board), None
+            return self.evaluation_function(board), None
 
         moves = list(board.legal_moves)
         best_score = float('-inf') if board.turn else float('inf')
@@ -50,5 +36,5 @@ class MinMax:
         return best_move
 
 def play_min_max(board):
-    minmax = MinMax()
+    minmax = MinMax(simple_material_evaluator)
     return minmax.select_move(board)
