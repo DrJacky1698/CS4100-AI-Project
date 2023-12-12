@@ -388,14 +388,39 @@ def simple_piece_count_evaluator(BOARD, player='white'):
     return score
 
 
-'''This evaluator looks at the number of pieces for the provided side that are under attack. since having more of your pieces
+'''This evaluator looks at the number of pieces for the provided side that are under attack. Since having more of your pieces
 under attack is a bad thing, the total amount of pieces under attack is returned as a negative number to stay consistent with
-the format of the other evaluation functions where positive numbers denote a better position.'''
+the format of the other evaluation functions where positive numbers denote a better position.Since this evaluator is intended
+as part of the random forest training algorithm, to cause less overlap with other evaluators, any of the pieces that
+ would be considered under attack by the king_safety_evaluator, will not also be considered under attack here to prevent 
+ double-counting and evaluator overlap. This means that the king and all squares immediately around it will not be
+counted towards the total number of squares being attacked for a side.'''
 def pieces_attacked_evaluator(BOARD, player='white'):
-    pass
+    if player == 'white':
+        playerColor = chess.WHITE
+        enemyColor = chess.BLACK
+    else:
+        playerColor = chess.BLACK
+        enemyColor = chess.WHITE
 
-'''fen = "8/8/8/8/8/8/3BBB2/8"
+    enemyAttackers = 0
+
+    pieces = BOARD.piece_map()
+
+    playerKingSquare = BOARD.king(playerColor)
+    playerKingAdjacentSquares = BOARD.attacks(playerKingSquare)
+
+    for key in pieces:
+        piece = str(pieces[key])
+        if piece.isupper() and player == 'white' and key not in playerKingAdjacentSquares and key != playerKingSquare:
+            enemyAttackers += len(BOARD.attackers(enemyColor, key))
+        elif piece.islower() and player == 'black' and key not in playerKingAdjacentSquares and key != playerKingSquare:
+            enemyAttackers += len(BOARD.attackers(enemyColor, key))
+
+    return enemyAttackers * -1
+
+'''fen = "rnbQ1bnr/ppp2ppp/4p2k/1q1p2B1/3P4/8/PPP1PPPP/RN2KBNR"
 BOARD = chess.Board(fen)
 
-print(simple_piece_count_evaluator(BOARD, player='white'))'''
+print(pieces_attacked_evaluator(BOARD, player='black'))'''
 
