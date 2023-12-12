@@ -367,9 +367,26 @@ def king_safety_evaluator(BOARD, player='white'):
 
     return enemyAttackers
 
+'''This very simple evaluator just counts the amount of pieces present for the given side.
+it is intended to be used as one of the evaluation functions for the random forest learning algorithm
+in tandem with other more advanced evaluation functions.'''
+def simple_piece_count_evaluator(BOARD, player='white'):
+    score = 0
+    if player == 'white':
+        pieces = BOARD.piece_map()
+    else:
+        pieces = BOARD.mirror().piece_map()
 
-'''fen = "rnb1kb1r/ppp1pppp/2q2n2/3p4/8/3P1N2/PPPKPPPP/RNBQ1B1R"
+    for key in pieces:
+        piece = str(pieces[key])
+        if piece.isupper():
+            score += 1
+
+    return score
+
+
+'''fen = "8/8/8/8/8/8/3BBB2/8"
 BOARD = chess.Board(fen)
 
-print(king_safety_evaluator(BOARD, player='white'))'''
+print(simple_piece_count_evaluator(BOARD, player='white'))'''
 
