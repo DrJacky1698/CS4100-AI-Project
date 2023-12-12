@@ -347,7 +347,10 @@ def tapered_piece_squares_evaluator(BOARD, player='white'):
 
 '''This evaluator only evaluates the king safety of the provided side by looking at how many pieces the opponent has attacking the king or
 any of the squares immediately adjacent to the king. If an enemy piece attacks multiple squares in this area, it will be counted multiple
-times. Also, additional weight is placed on pieces attacking the king directly.'''
+times. Also, additional weight is placed on pieces attacking the king directly. In order to stay consistent with
+the other evaluation function's, where higher output results are better then lower results, the number of attacked squares
+is returned as a negative number, since having more squares near the king under attack, means lower king safety,
+ which is a bad thing.'''
 def king_safety_evaluator(BOARD, player='white'):
     if player == 'white':
         playerColor = chess.WHITE
@@ -365,7 +368,7 @@ def king_safety_evaluator(BOARD, player='white'):
 
     enemyAttackers += 2 * len(BOARD.attackers(enemyColor, playerKingSquare))
 
-    return enemyAttackers
+    return enemyAttackers * -1
 
 '''This very simple evaluator just counts the amount of pieces present for the given side.
 it is intended to be used as one of the evaluation functions for the random forest learning algorithm
@@ -384,6 +387,12 @@ def simple_piece_count_evaluator(BOARD, player='white'):
 
     return score
 
+
+'''This evaluator looks at the number of pieces for the provided side that are under attack. since having more of your pieces
+under attack is a bad thing, the total amount of pieces under attack is returned as a negative number to stay consistent with
+the format of the other evaluation functions where positive numbers denote a better position.'''
+def pieces_attacked_evaluator(BOARD, player='white'):
+    pass
 
 '''fen = "8/8/8/8/8/8/3BBB2/8"
 BOARD = chess.Board(fen)
