@@ -345,9 +345,31 @@ def tapered_piece_squares_evaluator(BOARD, player='white'):
 
     return score
 
-'''
-fen = "rnbqkb1r/pp2pppp/2p4n/3p4/8/3P1N2/PPPKPPPP/RNBQ1B1R"
+'''This evaluator only evaluates the king safety of the provided side by looking at how many pieces the opponent has attacking the king or
+any of the squares immediately adjacent to the king. If an enemy piece attacks multiple squares in this area, it will be counted multiple
+times. Also, additional weight is placed on pieces attacking the king directly.'''
+def king_safety_evaluator(BOARD, player='white'):
+    if player == 'white':
+        playerColor = chess.WHITE
+        enemyColor = chess.BLACK
+    else:
+        playerColor = chess.BLACK
+        enemyColor = chess.WHITE
+
+    playerKingSquare = BOARD.king(playerColor)
+
+    enemyAttackers = 0
+    playerKingAdjacentSquares = BOARD.attacks(playerKingSquare)
+    for square in playerKingAdjacentSquares:
+        enemyAttackers += len(BOARD.attackers(enemyColor, square))
+
+    enemyAttackers += 2 * len(BOARD.attackers(enemyColor, playerKingSquare))
+
+    return enemyAttackers
+
+
+'''fen = "rnb1kb1r/ppp1pppp/2q2n2/3p4/8/3P1N2/PPPKPPPP/RNBQ1B1R"
 BOARD = chess.Board(fen)
 
-print(stockfish_evaluator(BOARD, player='white'))'''
+print(king_safety_evaluator(BOARD, player='white'))'''
 
