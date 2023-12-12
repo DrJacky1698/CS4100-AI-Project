@@ -36,12 +36,14 @@ def simple_material_evaluator(BOARD, player='white'):
 #uses stockfish's evaluator in order to test our algorithms with a known good evaluator
 #https://stackoverflow.com/questions/58556338/python-evaluating-a-board-position-using-stockfish-from-the-python-chess-librar
 def stockfish_evaluator(BOARD, player='white'):
-    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+    engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
     result = engine.analyse(BOARD, chess.engine.Limit(time=0.01))
+    engine.close()
     if player == 'white':
         return result['score'].white()
     else:
         return result['score'].black()
+    
 
 
 
@@ -169,8 +171,8 @@ def basic_piece_squares_and_material_evaluator(BOARD, player='white'):
 
 
 
-'''fen = "8/6p1/8/8/8/8/8/8"
+fen = "rnbqkb1r/pp2pppp/2p4n/3p4/8/3P1N2/PPPKPPPP/RNBQ1B1R"
 BOARD = chess.Board(fen)
 
-print(basic_piece_squares_evaluator(BOARD, player='black'))'''
+print(stockfish_evaluator(BOARD, player='white'))
 
