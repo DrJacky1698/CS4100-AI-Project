@@ -5,7 +5,9 @@ import copy
 
 engine = False
 
-'''All evaluation functions take in a "player" parameter and return a positive number corresponding to how good
+'''Use the relative evaluators instead. The relative .......'''
+
+'''All evaluation functions take in a "player" parameter and return a number corresponding to how good
  that player's position is. If you need to compare it to the position of the other player or to find out
   which player currently has an advantage, call the evaluation function being used twice, once for each player's
    perspective and then compare them.'''
@@ -33,9 +35,18 @@ def simple_material_evaluator(BOARD, player='white'):
 
     return score
 
+
+def relative_simple_material_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return simple_material_evaluator(BOARD, player='white') - simple_material_evaluator(BOARD, player='black')
+    else:
+        return simple_material_evaluator(BOARD, player='black') - simple_material_evaluator(BOARD, player='white')
+
 def initializeStockfishEngine():
     global engine
     engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
+#    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+
 
 def closeStockfishEngine():
     global engine
@@ -158,7 +169,7 @@ def basic_piece_squares_and_material_evaluator(BOARD, player='white'):
         innerKey = key % 8
 
 
-        if piece.upper() :
+        if piece.isupper() :
             if piece == 'P':
                 score += pawn[outerKey][innerKey] + scoring['P']
             elif piece == 'R':
@@ -178,6 +189,13 @@ def basic_piece_squares_and_material_evaluator(BOARD, player='white'):
                 raise Exception("Invalid piece in basic_piece_squares_evaluator")
 
     return score
+
+
+def relative_basic_piece_squares_and_material_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return basic_piece_squares_and_material_evaluator(BOARD, player='white') - basic_piece_squares_and_material_evaluator(BOARD, player='black')
+    else:
+        return basic_piece_squares_and_material_evaluator(BOARD, player='black') - basic_piece_squares_and_material_evaluator(BOARD, player='white')
 
 '''This evaluator improves on basic_piece_squares_and_material_evaluator in several ways ways.
 Firstly, it features different values for all the piece types from the middle game to the end game, which
@@ -337,7 +355,7 @@ def tapered_piece_squares_evaluator(BOARD, player='white'):
         outerKey = 7 - math.floor(key / 8)
         innerKey = key % 8
 
-        if piece.upper():
+        if piece.isupper():
             if piece == 'P':
                 score += mg_pawn_table[outerKey][innerKey] * middleGameModifier + eg_pawn_table[outerKey][innerKey] * endGameModifier
             elif piece == 'R':
@@ -354,6 +372,14 @@ def tapered_piece_squares_evaluator(BOARD, player='white'):
                 raise Exception("Invalid piece in basic_piece_squares_evaluator")
 
     return score
+
+
+def relative_tapered_piece_squares_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return tapered_piece_squares_evaluator(BOARD, player='white') - tapered_piece_squares_evaluator(BOARD, player='black')
+    else:
+        return tapered_piece_squares_evaluator(BOARD, player='black') - tapered_piece_squares_evaluator(BOARD, player='white')
+
 
 '''This evaluator only evaluates the king safety of the provided side by looking at how many pieces the opponent has attacking the king or
 any of the squares immediately adjacent to the king. If an enemy piece attacks multiple squares in this area, it will be counted multiple
@@ -380,6 +406,12 @@ def king_safety_evaluator(BOARD, player='white'):
 
     return enemyAttackers * -1
 
+def relative_king_safety_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return king_safety_evaluator(BOARD, player='white') - king_safety_evaluator(BOARD, player='black')
+    else:
+        return king_safety_evaluator(BOARD, player='black') - king_safety_evaluator(BOARD, player='white')
+
 '''This very simple evaluator just counts the amount of pieces present for the given side.
 it is intended to be used as one of the evaluation functions for the random forest learning algorithm
 in tandem with other more advanced evaluation functions.'''
@@ -397,6 +429,11 @@ def simple_piece_count_evaluator(BOARD, player='white'):
 
     return score
 
+def relative_simple_piece_count_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return simple_piece_count_evaluator(BOARD, player='white') - simple_piece_count_evaluator(BOARD, player='black')
+    else:
+        return simple_piece_count_evaluator(BOARD, player='black') - simple_piece_count_evaluator(BOARD, player='white')
 
 '''This evaluator looks at the number of pieces for the provided side that are under attack. Since having more of your pieces
 under attack is a bad thing, the total amount of pieces under attack is returned as a negative number to stay consistent with
@@ -429,10 +466,22 @@ def pieces_attacked_evaluator(BOARD, player='white'):
 
     return enemyAttackers * -1
 
+
+def relative_pieces_attacked_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return pieces_attacked_evaluator(BOARD, player='white') - pieces_attacked_evaluator(BOARD, player='black')
+    else:
+        return pieces_attacked_evaluator(BOARD, player='black') - pieces_attacked_evaluator(BOARD, player='white')
+
 '''initializeStockfishEngine()
-fen = "rnbqkbnr/ppp1pppp/3p4/8/8/3P4/PPPKPPPP/RNBQ1BNR"
+fen = "rnbqkbnr/1ppppppp/p7/8/8/6P1/PPPPPP1P/RNBQKBNR"
 BOARD = chess.Board(fen)
-print(stockfish_evaluator(BOARD, player='black'))
+
+print(tapered_piece_squares_evaluator(BOARD, player='white'))
+print(tapered_piece_squares_evaluator(BOARD, player='black'))
+
+print(relative_tapered_piece_squares_evaluator(BOARD, player='white'))
+print(relative_tapered_piece_squares_evaluator(BOARD, player='black'))
 closeStockfishEngine()'''
 
 
