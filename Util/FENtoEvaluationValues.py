@@ -1,6 +1,6 @@
 import csv
 import chess
-from Algorithm.EvaluationFunctions import relative_basic_piece_squares_and_material_evaluator, stockfish_evaluator, initializeStockfishEngine, closeStockfishEngine, relative_simple_material_evaluator, relative_tapered_piece_squares_evaluator, relative_king_safety_evaluator, relative_pieces_attacked_evaluator, relative_simple_piece_count_evaluator
+from Algorithm.EvaluationFunctions import relative_basic_piece_squares_and_material_evaluator, stockfish_evaluator, initializeStockfishEngine, closeStockfishEngine, relative_tapered_piece_squares_evaluator, relative_king_safety_evaluator, relative_pieces_attacked_evaluator, relative_simple_piece_count_evaluator
 
 
 def process_fen_data(input_csv, output_csv, batch_size=100):
@@ -13,7 +13,7 @@ def process_fen_data(input_csv, output_csv, batch_size=100):
 
     with open(output_csv, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Game Number", "FEN", "Relative_simple_material_evaluator",
+        writer.writerow(["Game Number", "FEN",
                          "Relative_basic_piece_squares_and_material_evaluator (White)", 
                          "Relative_tapered_piece_squares_evaluator (White)",
                          "Relative_king_safety_evaluator (White)",
@@ -25,7 +25,6 @@ def process_fen_data(input_csv, output_csv, batch_size=100):
             board = chess.Board(fen)
             evaluations = [game_number, fen]
             
-            evaluations.append(relative_simple_material_evaluator(board, 'white'))
             evaluations.append(relative_basic_piece_squares_and_material_evaluator(board, 'white'))
             evaluations.append(relative_tapered_piece_squares_evaluator(board, 'white'))
             evaluations.append(relative_king_safety_evaluator(board, 'white'))
