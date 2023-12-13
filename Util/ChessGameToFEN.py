@@ -41,15 +41,14 @@ class ChessGameToFEN:
             return False
 
     @classmethod
-    def read_games_and_convert_to_fen(cls, file_path, randomize=True, sample_fraction=0.1):
+    def read_games_and_convert_to_fen(cls, file_path, output_file, randomize=True, sample_fraction=0.1, chunk_size=100):
         with open(file_path, 'r') as file:
             total_games = sum(1 for line in file if not line.startswith('#') and '###' in line)
 
-        # randomly select
         selected_game_indices = random.sample(range(total_games), int(total_games * sample_fraction))
-
-        all_games_fen = []
         current_game_index = -1
+        chunk_data = []
+        games_record_saved = 0
 
         with open(file_path, 'r') as file:
             for line in file:
@@ -60,27 +59,24 @@ class ChessGameToFEN:
                         chess_game = cls(moves_part)
                         game_fen = chess_game.process_moves(randomize=randomize)
                         if game_fen is not None:  # only add valid games
-                            all_games_fen.append(game_fen)
-                            # you may uncomment this line to see the process of 
-                            # producing game board, but it would be fast if you don't
-                            # print(game_fen)
+                            chunk_data.append([current_game_index + 1, game_fen])
+                            games_record_saved += 1
 
-        return all_games_fen
+                            if len(chunk_data) == chunk_size:
+                                cls.save_chunk_to_csv(chunk_data, output_file)
+                                print(f"Saved {games_record_saved} games so far.")
+                                chunk_data.clear()  # Clear the array for the next 100 data
+
+        # remaining data when read the end of file (probabilty not used)
+        if chunk_data:
+            cls.save_chunk_to_csv(chunk_data, output_file)
+
+    @staticmethod
+    def save_chunk_to_csv(chunk_data, output_file):
+        df = pd.DataFrame(chunk_data, columns=["Game Number", "FEN"])
+        df.to_csv(output_file, mode='a', header=not pd.io.common.file_exists(output_file), index=False)
 
 file_path = 'Util/chessdata1.txt'
-all_games_fen = ChessGameToFEN.read_games_and_convert_to_fen(file_path)
-
-def save_fen_to_csv(all_games_fen, output_file):
-    data = []
-    for game_number, fen in enumerate(all_games_fen, start=1):
-        data.append([game_number, fen])
-
-    df = pd.DataFrame(data, columns=["Game Number", "FEN"])
-    df.to_csv(output_file, index=False)
-
-file_path = 'Util/chessdata1.txt'
-all_games_fen = ChessGameToFEN.read_games_and_convert_to_fen(file_path)
-
-output_file = 'Util/chess_games_fen_example_output.csv'
-save_fen_to_csv(all_games_fen, output_file)
+output_file = 'Util/chess_games_fen_output.csv'
+ChessGameToFEN.read_games_and_convert_to_fen(file_path, output_file)
 
