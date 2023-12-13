@@ -3,6 +3,7 @@ import chess.engine
 import math
 import copy
 
+engine = False
 
 '''All evaluation functions take in a "player" parameter and return a positive number corresponding to how good
  that player's position is. If you need to compare it to the position of the other player or to find out
@@ -32,13 +33,22 @@ def simple_material_evaluator(BOARD, player='white'):
 
     return score
 
+def initializeStockfishEngine():
+    global engine
+    engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
+
+def closeStockfishEngine():
+    global engine
+    engine.close()
+
+
 
 #uses stockfish's evaluator in order to test our algorithms with a known good evaluator
 #https://stackoverflow.com/questions/58556338/python-evaluating-a-board-position-using-stockfish-from-the-python-chess-librar
 def stockfish_evaluator(BOARD, player='white'):
-    engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
+    #engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
     result = engine.analyse(BOARD, chess.engine.Limit(time=0.01))
-    engine.close()
+    #engine.close()
     if player == 'white':
         return result['score'].white()
     else:
@@ -419,8 +429,10 @@ def pieces_attacked_evaluator(BOARD, player='white'):
 
     return enemyAttackers * -1
 
-'''fen = "rnbQ1bnr/ppp2ppp/4p2k/1q1p2B1/3P4/8/PPP1PPPP/RN2KBNR"
+'''initializeStockfishEngine()
+fen = "rnbqkbnr/ppp1pppp/3p4/8/8/3P4/PPPKPPPP/RNBQ1BNR"
 BOARD = chess.Board(fen)
+print(stockfish_evaluator(BOARD, player='black'))
+closeStockfishEngine()'''
 
-print(pieces_attacked_evaluator(BOARD, player='black'))'''
 
