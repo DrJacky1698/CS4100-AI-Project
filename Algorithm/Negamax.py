@@ -1,10 +1,12 @@
 import chess
+from Algorithm.EvaluationFunctions import basic_piece_squares_and_material_evaluator, stockfish_evaluator, simple_material_evaluator
 
 class Negamax:
     def __init__(self, search_depth=6):
         self.search_depth = search_depth
 
     def run_negamax(self, current_board, depth_remaining, alpha, beta, player_color):
+        # calls the evaluation function when a leaf node in the search tree is reached to avoid unnecessary calculations in intermediate steps
         if depth_remaining == 0 or current_board.is_game_over():
             return player_color * self.board_evaluation(current_board)
 
