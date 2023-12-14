@@ -16,7 +16,7 @@ engine = False
 #simple evaluation function which improves on the one from the tutorial we found in minmax.py by making a bishop
 # worth slightly more than a knight, and also giving the king a value to encourage capturing the king for a checkmate.
 #https://www.chessprogramming.org/Simplified_Evaluation_Function
-def simple_material_evaluator(BOARD, player='white'):
+def simple_material_evaluator(BOARD, player):
     scoring = {'P': 100,
                'N': 320,
                'B': 330,
@@ -36,7 +36,7 @@ def simple_material_evaluator(BOARD, player='white'):
     return score
 
 
-def relative_simple_material_evaluator(BOARD, player='white'):
+def relative_simple_material_evaluator(BOARD, player):
     if player == 'white':
         return simple_material_evaluator(BOARD, player='white') - simple_material_evaluator(BOARD, player='black')
     else:
@@ -44,8 +44,8 @@ def relative_simple_material_evaluator(BOARD, player='white'):
 
 def initializeStockfishEngine():
     global engine
-    engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
-#    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+    #engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
+    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
 
 
 def closeStockfishEngine():
@@ -56,7 +56,7 @@ def closeStockfishEngine():
 
 #uses stockfish's evaluator in order to test our algorithms with a known good evaluator
 #https://stackoverflow.com/questions/58556338/python-evaluating-a-board-position-using-stockfish-from-the-python-chess-librar
-def stockfish_evaluator(BOARD, player='white'):
+def stockfish_evaluator(BOARD, player):
     #engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
     result = engine.analyse(BOARD, chess.engine.Limit(time=0.01))
     #engine.close()
@@ -80,7 +80,7 @@ The reason for this is that otherwise it could appear better to let a piece be c
 a bad square, but we don't want our chess engine giving away pieces that have negative positional value.
 this way we ensure that all values are still positive, and also account for the different worth of each piece'''
 
-def basic_piece_squares_and_material_evaluator(BOARD, player='white'):
+def basic_piece_squares_and_material_evaluator(BOARD, player):
     scoring = {'P': 100,
                'N': 320,
                'B': 330,
@@ -191,7 +191,7 @@ def basic_piece_squares_and_material_evaluator(BOARD, player='white'):
     return score
 
 
-def relative_basic_piece_squares_and_material_evaluator(BOARD, player='white'):
+def relative_basic_piece_squares_and_material_evaluator(BOARD, player):
     if player == 'white':
         return basic_piece_squares_and_material_evaluator(BOARD, player='white') - basic_piece_squares_and_material_evaluator(BOARD, player='black')
     else:
@@ -207,7 +207,7 @@ and so should lead to better performance. We sourced these values from the follo
 and is based on expanding what we did for the basic_piece_squares_and_material_evaluator.
 https://www.chessprogramming.org/PeSTO%27s_Evaluation_Function
 '''
-def tapered_piece_squares_evaluator(BOARD, player='white'):
+def tapered_piece_squares_evaluator(BOARD, player):
     mg_pawn_table = [
         [0, 0, 0, 0, 0, 0, 0, 0],
         [98, 134, 61, 95, 68, 126, 34, -11],
