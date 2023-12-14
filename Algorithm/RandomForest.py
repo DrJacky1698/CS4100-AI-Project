@@ -104,12 +104,71 @@ Y = df['Stockfish Evaluator (White)']
 X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
 
 print("Start training Random Forest Regressor...")
-regressor = RandomForestRegressor(random_state=0)
-regressor.fit(X_train, y_train)
+# regressor = RandomForestRegressor(random_state=0)
+# regressor.fit(X_train, y_train)
 
 
-# evaluate the model
-y_pred = regressor.predict(X_test)
+# # evaluate the model
+# y_pred = regressor.predict(X_test)
+
+# # Mean Absolute Error
+# mae = mean_absolute_error(y_test, y_pred)
+# print("Mean Absolute Error: ", mae)
+
+# # Mean Squared Error
+# mse = mean_squared_error(y_test, y_pred)
+# print("Mean Squared Error: ", mse)
+
+# # R^2 Score
+# r2 = r2_score(y_test, y_pred)
+# print("R^2 Score: ", r2)
+
+# # visulized result
+# # Actual vs Predicted values plot
+# plt.scatter(y_test, y_pred)
+# plt.xlabel('Actual Values')
+# plt.ylabel('Predicted Values')
+# plt.title('Actual vs Predicted Values')
+# plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=4)  # Diagonal line
+# plt.show()
+
+
+# # Residual plot
+# residuals = y_test - y_pred
+# plt.scatter(y_pred, residuals)
+# plt.xlabel('Predicted Values')
+# plt.ylabel('Residuals')
+# plt.title('Residuals vs Predicted Values')
+# plt.axhline(y=0, color='k', linestyle='--')
+# plt.show()
+
+#result of first run:
+# Mean Absolute Error:  107.42621793131048
+# Mean Squared Error:  39150.82134337473
+# R^2 Score:  0.35446120519361146
+
+# use Grid Search to tuning the hyperparameter
+# which is the most regular way of tuning the model
+param_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4],
+    'max_features': ['auto', 'sqrt']
+}
+
+grid_search = GridSearchCV(estimator=RandomForestRegressor(random_state=42), 
+                           param_grid=param_grid, 
+                           cv=3, 
+                           n_jobs=-1, 
+                           verbose=2)
+
+grid_search.fit(X_train, y_train)
+
+print("Best parameters:", grid_search.best_params_)
+
+best_regressor = grid_search.best_estimator_
+y_pred = best_regressor.predict(X_test)
 
 # Mean Absolute Error
 mae = mean_absolute_error(y_test, y_pred)
@@ -141,26 +200,3 @@ plt.ylabel('Residuals')
 plt.title('Residuals vs Predicted Values')
 plt.axhline(y=0, color='k', linestyle='--')
 plt.show()
-
-# use Grid Search to tuning the hyperparameter
-# which is the most regular way of tuning the model
-# param_grid = {
-#     'n_estimators': [100, 200, 300],
-#     'max_depth': [10, 20, 30],
-#     'min_samples_split': [2, 5, 10],
-#     'min_samples_leaf': [1, 2, 4],
-#     'max_features': ['auto', 'sqrt']
-# }
-
-# grid_search = GridSearchCV(estimator=RandomForestRegressor(random_state=42), 
-#                            param_grid=param_grid, 
-#                            cv=3, 
-#                            n_jobs=-1, 
-#                            verbose=2)
-
-# grid_search.fit(X_train, y_train)
-
-# print("Best parameters:", grid_search.best_params_)
-
-# best_regressor = grid_search.best_estimator_
-# y_pred = best_regressor.predict(X_test)
