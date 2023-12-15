@@ -273,6 +273,8 @@ def main():
     parser.add_argument("mode", nargs='?', default='two_agents', help="Game mode: 'human', 'one_agent', or 'two_agents'")
     parser.add_argument("--agent1", help="First AI agent: 'min_max' or 'nega_max'", default="min_max")
     parser.add_argument("--agent2", help="Second AI agent: 'min_max' or 'nega_max' (only for two_agents mode)", default="min_max")
+    parser.add_argument("--evaluator1", help="Evaluator for the first AI agent", default="relative_simple_material_evaluator")
+    parser.add_argument("--evaluator2", help="Evaluator for the second AI agent (only for two_agents mode)", default="relative_simple_material_evaluator")
     parser.add_argument("--agent_color", help="AI agent color: 'white' or 'black' (only for one_agent mode)", default="white")
     parser.add_argument("--eval_func", help="Evaluation function for negamax algorithm", default="simple_material")
     args = parser.parse_args()
