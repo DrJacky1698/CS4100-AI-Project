@@ -200,3 +200,9 @@ plt.ylabel('Residuals')
 plt.title('Residuals vs Predicted Values')
 plt.axhline(y=0, color='k', linestyle='--')
 plt.show()
+
+
+# Best parameters: {'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 10, 'n_estimators': 300}
+# Mean Absolute Error:  101.97125895058595
+# Mean Squared Error:  35896.60630788062
+# R^2 Score:  0.4081183694617422
