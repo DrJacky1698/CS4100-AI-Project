@@ -487,9 +487,6 @@ def polynomial_regression_evaluator(BOARD, player='white'):
     evaluationFunctions = [relative_simple_material_evaluator, relative_tapered_piece_squares_evaluator, relative_king_safety_evaluator,
                            relative_simple_piece_count_evaluator, relative_pieces_attacked_evaluator]
     
-    if player.lower() == 'black':
-        BOARD = BOARD.mirror()
-    
     score = 0
     for i in range(len(evaluationFunctions)):
         score += ((evaluationFunctions[i](BOARD, player) - means[i]) / std_dev[i]) * weights[i]
@@ -504,7 +501,7 @@ def relative_polynomial_regression_evaluator(BOARD, player='white'):
 
 
 def random_forest_classifier_evaluator(BOARD, player='white'):
-    classifier_loaded = joblib.load('Algorithm/trained_random_forest_classifier.joblib')
+    classifier_loaded = joblib.load('trained_random_forest_classifier.joblib')
     print("Random forest classifier model loaded successfully as an evaluator.")
 
     # If the player is black, mirror the board to analyze it as white
@@ -547,7 +544,7 @@ def relative_random_forest_classifier_evaluator(BOARD, player='white'):
     
 
 def random_forest_regression_evaluator(BOARD, player='white'):
-    regressor_loaded = joblib.load('Algorithm/trained_random_forest_regressor.joblib')
+    regressor_loaded = joblib.load('trained_random_forest_regressor.joblib')
     print("Random forest regression model loaded successfully as an evaluator.")
 
      # If the player is black, mirror the board to analyze it as white
@@ -574,16 +571,16 @@ def relative_random_forest_regression_evaluator(BOARD, player='white'):
         return random_forest_regression_evaluator(BOARD, player='black') - random_forest_regression_evaluator(BOARD, player='white')
 
 # initializeStockfishEngine()
-fen = "rnbqkbnr/1ppppppp/p7/8/8/6P1/PPPPPP1P/RNBQKBNR"
-BOARD = chess.Board(fen)
+#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
+#BOARD = chess.Board(fen)
 
-# print(tapered_piece_squares_evaluator(BOARD, player='white'))
-# print(tapered_piece_squares_evaluator(BOARD, player='black'))
+#print(relative_polynomial_regression_evaluator(BOARD, player='white'))
+#print(relative_polynomial_regression_evaluator(BOARD, player='black'))
 
-print(relative_random_forest_regression_evaluator(BOARD, player='white'))
-print(relative_random_forest_regression_evaluator(BOARD, player='black'))
-print(relative_random_forest_classifier_evaluator(BOARD, player='white'))
-print(relative_random_forest_classifier_evaluator(BOARD, player='black'))
+#print(relative_random_forest_regression_evaluator(BOARD, player='white'))
+#print(relative_random_forest_regression_evaluator(BOARD, player='black'))
+#print(relative_random_forest_classifier_evaluator(BOARD, player='white'))
+#print(relative_random_forest_classifier_evaluator(BOARD, player='black'))
 # closeStockfishEngine()
 
 
