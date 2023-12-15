@@ -3,6 +3,9 @@ import chess.engine
 import math
 import copy
 
+import pandas as pd
+import joblib
+
 engine = False
 
 '''Use the relative evaluators instead. The relative .......'''
@@ -483,22 +486,104 @@ def polynomial_regression_evaluator(BOARD, player='white'):
                18.350290002998786]
     evaluationFunctions = [relative_simple_material_evaluator, relative_tapered_piece_squares_evaluator, relative_king_safety_evaluator,
                            relative_simple_piece_count_evaluator, relative_pieces_attacked_evaluator]
+    
+    if player.lower() == 'black':
+        BOARD = BOARD.mirror()
+    
     score = 0
     for i in range(len(evaluationFunctions)):
         score += ((evaluationFunctions[i](BOARD, player) - means[i]) / std_dev[i]) * weights[i]
 
     return score
 
+def relative_polynomial_regression_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return polynomial_regression_evaluator(BOARD, player='white') - polynomial_regression_evaluator(BOARD, player='black')
+    else:
+        return polynomial_regression_evaluator(BOARD, player='black') - polynomial_regression_evaluator(BOARD, player='white')
 
-'''initializeStockfishEngine()
+
+def random_forest_classifier_evaluator(BOARD, player='white'):
+    classifier_loaded = joblib.load('Algorithm/trained_random_forest_classifier.joblib')
+    print("Random forest classifier model loaded successfully as an evaluator.")
+
+    # If the player is black, mirror the board to analyze it as white
+    if player.lower() == 'black':
+        BOARD = BOARD.mirror()
+
+    features = {
+        'Relative_simple_material_evaluator (White)': relative_simple_material_evaluator(BOARD, 'white'),
+        'Relative_tapered_piece_squares_evaluator (White)': relative_tapered_piece_squares_evaluator(BOARD, 'white'),
+        'Relative_king_safety_evaluator (White)': relative_king_safety_evaluator(BOARD, 'white'),
+        'Relative_simple_piece_count_evaluator (White)': relative_simple_piece_count_evaluator(BOARD, 'white'),
+        'Relative_pieces_attacked_evaluator (White)': relative_pieces_attacked_evaluator(BOARD, 'white')
+    }
+
+    new_data_df = pd.DataFrame([features])
+    predicted_class = classifier_loaded.predict(new_data_df)[0]
+
+    # map predicted class to numerical values to return
+    # these values are choosen as the midpoint of the range of 
+    # each group when assigned
+    class_to_value = {
+        'Extremely Negative': -2000,
+        'Highly Negative': -550,
+        'Negative': -60,
+        'Slightly Negative to Average': 30,
+        'Positive': 300,
+        'Highly Positive': 750,
+        'Extremely Positive': 2000
+    }
+
+    evaluation_value = class_to_value[predicted_class]
+    return evaluation_value
+
+
+def relative_random_forest_classifier_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return random_forest_classifier_evaluator(BOARD, player='white') - random_forest_classifier_evaluator(BOARD, player='black')
+    else:
+        return random_forest_classifier_evaluator(BOARD, player='black') - random_forest_classifier_evaluator(BOARD, player='white')
+    
+
+def random_forest_regression_evaluator(BOARD, player='white'):
+    regressor_loaded = joblib.load('Algorithm/trained_random_forest_regressor.joblib')
+    print("Random forest regression model loaded successfully as an evaluator.")
+
+     # If the player is black, mirror the board to analyze it as white
+    if player.lower() == 'black':
+        BOARD = BOARD.mirror()
+
+    features = {
+        'Relative_simple_material_evaluator (White)': relative_simple_material_evaluator(BOARD, 'white'),
+        'Relative_tapered_piece_squares_evaluator (White)': relative_tapered_piece_squares_evaluator(BOARD, 'white'),
+        'Relative_king_safety_evaluator (White)': relative_king_safety_evaluator(BOARD, 'white'),
+        'Relative_simple_piece_count_evaluator (White)': relative_simple_piece_count_evaluator(BOARD, 'white'),
+        'Relative_pieces_attacked_evaluator (White)': relative_pieces_attacked_evaluator(BOARD, 'white')
+    }
+
+    new_data_df = pd.DataFrame([features])
+    predicted_value = regressor_loaded.predict(new_data_df)[0]
+    return predicted_value
+
+
+def relative_random_forest_regression_evaluator(BOARD, player='white'):
+    if player == 'white':
+        return random_forest_regression_evaluator(BOARD, player='white') - random_forest_regression_evaluator(BOARD, player='black')
+    else:
+        return random_forest_regression_evaluator(BOARD, player='black') - random_forest_regression_evaluator(BOARD, player='white')
+
+# initializeStockfishEngine()
 fen = "rnbqkbnr/1ppppppp/p7/8/8/6P1/PPPPPP1P/RNBQKBNR"
 BOARD = chess.Board(fen)
 
-print(tapered_piece_squares_evaluator(BOARD, player='white'))
-print(tapered_piece_squares_evaluator(BOARD, player='black'))
+# print(tapered_piece_squares_evaluator(BOARD, player='white'))
+# print(tapered_piece_squares_evaluator(BOARD, player='black'))
 
-print(relative_tapered_piece_squares_evaluator(BOARD, player='white'))
-print(relative_tapered_piece_squares_evaluator(BOARD, player='black'))
-closeStockfishEngine()'''
+print(relative_random_forest_regression_evaluator(BOARD, player='white'))
+print(relative_random_forest_regression_evaluator(BOARD, player='black'))
+print(relative_random_forest_classifier_evaluator(BOARD, player='white'))
+print(relative_random_forest_classifier_evaluator(BOARD, player='black'))
+# closeStockfishEngine()
 
 

@@ -88,7 +88,9 @@ import joblib
 print("Reading data...")
 df = pd.read_csv('Algorithm/evaluation_results_dimitar.csv')
 
+# drop uninterpretable FEN and unrelative Game Number
 df = df.drop('FEN', axis=1)
+df = df.drop('Game Number', axis=1)
 
 # Convert 'Stockfish Evaluator (White)' column to numeric, including handling of + and - signs
 df['Stockfish Evaluator (White)'] = pd.to_numeric(df['Stockfish Evaluator (White)'], errors='coerce')
@@ -98,7 +100,7 @@ df = df.dropna(subset=['Stockfish Evaluator (White)'])
 X = df.drop('Stockfish Evaluator (White)', axis=1)
 Y = df['Stockfish Evaluator (White)']
 
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=0)
 
 print("Start training Random Forest Regressor...")
 regressor = RandomForestRegressor(random_state=0)
@@ -140,75 +142,87 @@ plt.axhline(y=0, color='k', linestyle='--')
 plt.show()
 
 #result of first run:
-# Mean Absolute Error:  107.42621793131048
-# Mean Squared Error:  39150.82134337473
-# R^2 Score:  0.35446120519361146
+# Mean Absolute Error:  113.21851357112526
+# Mean Squared Error:  42957.95720344254
+# R^2 Score:  0.2916871991716854
 
 # use Grid Search to tuning the hyperparameter
 # which is the most regular way of tuning the model
-param_grid = {
-    'n_estimators': [100, 200, 300],
-    'max_depth': [10, 20, 30],
-    'min_samples_split': [2, 5, 10],
-    'min_samples_leaf': [1, 2, 4],
-    'max_features': ['auto', 'sqrt']
+# param_grid = {
+#     'n_estimators': [100, 200, 300],
+#     'max_depth': [10, 20, 30],
+#     'min_samples_split': [2, 5, 10],
+#     'min_samples_leaf': [1, 2, 4],
+#     'max_features': ['auto', 'sqrt']
+# }
+
+# grid_search = GridSearchCV(estimator=RandomForestRegressor(random_state=0), 
+#                            param_grid=param_grid, 
+#                            cv=3, 
+#                            n_jobs=-1, 
+#                            verbose=2)
+
+# grid_search.fit(X_train, y_train)
+
+# print("Best parameters:", grid_search.best_params_)
+
+# best_regressor = grid_search.best_estimator_
+# y_pred = best_regressor.predict(X_test)
+
+# # Mean Absolute Error
+# mae = mean_absolute_error(y_test, y_pred)
+# print("Mean Absolute Error: ", mae)
+
+# # Mean Squared Error
+# mse = mean_squared_error(y_test, y_pred)
+# print("Mean Squared Error: ", mse)
+
+# # R^2 Score
+# r2 = r2_score(y_test, y_pred)
+# print("R^2 Score: ", r2)
+
+# # visulized result
+# # Actual vs Predicted values plot
+# plt.scatter(y_test, y_pred)
+# plt.xlabel('Actual Values')
+# plt.ylabel('Predicted Values')
+# plt.title('Actual vs Predicted Values')
+# plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=4)  # Diagonal line
+# plt.show()
+
+
+# # Residual plot
+# residuals = y_test - y_pred
+# plt.scatter(y_pred, residuals)
+# plt.xlabel('Predicted Values')
+# plt.ylabel('Residuals')
+# plt.title('Residuals vs Predicted Values')
+# plt.axhline(y=0, color='k', linestyle='--')
+# plt.show()
+
+# Best parameters: {'max_depth': 10, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 2, 'n_estimators': 300}
+# Mean Absolute Error:  103.9378393255339
+# Mean Squared Error:  34295.82021537535
+# R^2 Score:  0.4018760608678794
+
+# Save the best model from grid search
+best_params = {
+    'max_depth': 10, 
+    'max_features': 'sqrt', 
+    'min_samples_leaf': 4, 
+    'min_samples_split': 2, 
+    'n_estimators': 300
 }
 
-grid_search = GridSearchCV(estimator=RandomForestRegressor(random_state=0), 
-                           param_grid=param_grid, 
-                           cv=3, 
-                           n_jobs=-1, 
-                           verbose=2)
 
-grid_search.fit(X_train, y_train)
-
-print("Best parameters:", grid_search.best_params_)
-
-best_regressor = grid_search.best_estimator_
-y_pred = best_regressor.predict(X_test)
-
-# Mean Absolute Error
-mae = mean_absolute_error(y_test, y_pred)
-print("Mean Absolute Error: ", mae)
-
-# Mean Squared Error
-mse = mean_squared_error(y_test, y_pred)
-print("Mean Squared Error: ", mse)
-
-# R^2 Score
-r2 = r2_score(y_test, y_pred)
-print("R^2 Score: ", r2)
-
-# visulized result
-# Actual vs Predicted values plot
-plt.scatter(y_test, y_pred)
-plt.xlabel('Actual Values')
-plt.ylabel('Predicted Values')
-plt.title('Actual vs Predicted Values')
-plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'k--', lw=4)  # Diagonal line
-plt.show()
-
-
-# Residual plot
-residuals = y_test - y_pred
-plt.scatter(y_pred, residuals)
-plt.xlabel('Predicted Values')
-plt.ylabel('Residuals')
-plt.title('Residuals vs Predicted Values')
-plt.axhline(y=0, color='k', linestyle='--')
-plt.show()
-
-# Best parameters Found: {'max_depth': 20, 'max_features': 'sqrt', 'min_samples_leaf': 4, 'min_samples_split': 10, 'n_estimators': 300}
-# Mean Absolute Error:  101.97125895058595
-# Mean Squared Error:  35896.60630788062
-# R^2 Score:  0.4081183694617422
-
-optimal_regressor = RandomForestRegressor(n_estimators=300,
-                                          max_depth=20,
-                                          min_samples_split=10,
-                                          min_samples_leaf=4,
-                                          max_features='sqrt',
-                                          random_state=42)
+optimal_regressor = RandomForestRegressor(
+    n_estimators=best_params['n_estimators'],
+    max_depth=best_params['max_depth'],
+    min_samples_split=best_params['min_samples_split'],
+    min_samples_leaf=best_params['min_samples_leaf'],
+    max_features=best_params['max_features'],
+    random_state=42
+)
 
 optimal_regressor.fit(X_train, y_train)
 y_pred = optimal_regressor.predict(X_test)
