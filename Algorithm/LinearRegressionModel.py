@@ -12,6 +12,8 @@ def standardization(feature):
     mean = np.mean(feature)
     std_dev = np.std(feature)
     standardized_feature = (feature - mean) / std_dev
+    # The following line was use to get the mean and standard deviation for each feature type for use with the polynomial regression evaluator
+    #print("first feature", feature[0], "mean", mean, "std_dev", std_dev)
     return standardized_feature
 
 def get_all_samples():
@@ -34,6 +36,9 @@ def get_all_samples():
             boards.append(board)
             features.append(featureRow)
             targets.append(target)
+
+    #for fIndex in range(len(features)):
+     #   print("feature ", fIndex, "mean", np.mean(features[fIndex]), "std_dev", np.std(features[fIndex]))
 
     #feature scaling done with help from chatgpt
     featureArray = np.array(features)
@@ -68,7 +73,10 @@ class PolynomialRegressionModel():
         self.eval_iters = []  # stores the iteration index number
         self.losses = []  # stores the loss at the iteration index number with the same list index as in eval_iters
         self.percentWinningPositionsIdentified = []
-        self.percentWithinTenPoints = []
+        self.percentWithinTwentyPoints = []
+        # percentages that are in the correct bin, where the bin refers to the bins used by the random forest classifier
+        self.percentWithinCorrectBin = []
+
 
     def get_features(self, x):
         "*** YOUR CODE HERE ***"
@@ -173,7 +181,8 @@ class PolynomialRegressionModel():
 
                     totalLose = 0
                     winningPositionsIdentified = 0
-                    withinTenPoints = 0
+                    withinTwentyPoints = 0
+                    withinBin = 0
                     for sample in range(numberOfTestingDataPoints):
                         currentTestingFeatures = testingxFeatures[sample]
                         self.features[1] = lambda board: currentTestingFeatures[0]
@@ -189,30 +198,35 @@ class PolynomialRegressionModel():
                             winningPositionsIdentified += 1
 
                         if abs(self.hypothesis(sample) - testingYSamples[sample]) <= 25:
-                            withinTenPoints += 1
+                            withinTwentyPoints += 1
 
+                        if get_bin(self.hypothesis(sample)) == get_bin(testingYSamples[sample]):
+                            withinBin += 1
 
                     self.eval_iters.append(iterations)
                     self.losses.append(totalLose / numberOfTestingDataPoints)
                     self.percentWinningPositionsIdentified.append(winningPositionsIdentified / numberOfTestingDataPoints)
-                    self.percentWithinTenPoints.append(withinTenPoints / numberOfTestingDataPoints)
+                    self.percentWithinTwentyPoints.append(withinTwentyPoints / numberOfTestingDataPoints)
+                    self.percentWithinCorrectBin.append(withinBin / numberOfTestingDataPoints)
 
                 iterations += 1
 
         return self.weights
 
 
+def get_bin(value):
+    bins = [-float('inf'), -1000, -100, -23, 84, 500, 1000, float('inf')]
+    for i in range(len(bins) - 1):
+        if bins[i] <= value < bins[i + 1]:
+            return i
+
 
 def plot_loss_curve(eval_iters, losses, title = None):
     plt.plot(eval_iters, losses)
 
-    # Calculate the step size for tick marks to have 1 decimal point in millions
-    #step_size = round((x_max - x_min) / 5e6, 1)  # Adjust 5e6 to control the number of ticks
-
+    #X axis scaling done with help from ChatGPT
     # Set the x-axis tick labels to display values in millions with one decimal point
     plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])
-
-    #plt.xticks(ticks=plt.xticks()[0], labels=[f'{int(x / 1000000)}M' for x in plt.xticks()[0]])
     plt.xlim(left=0)
 
     plt.xlabel("Iterations (Millions)")
@@ -224,7 +238,7 @@ def plot_loss_curve(eval_iters, losses, title = None):
 
 
 
-linear_model = PolynomialRegressionModel(learning_rate=5 * 10 ** -7)
+linear_model = PolynomialRegressionModel(learning_rate=1 * 10 ** -6)
 print("Weights", linear_model.train())
 
 
@@ -240,8 +254,17 @@ plt.yticks(ticks=plt.yticks()[0], labels=[f'{int(y * 100)}%' for y in plt.yticks
 plt.xlim(left=0)
 plt.show()
 
-plt.plot(linear_model.eval_iters, linear_model.percentWithinTenPoints)
+plt.plot(linear_model.eval_iters, linear_model.percentWithinTwentyPoints)
 plt.title("Polynomial Regression Percentage of Cases Our Model's Score is Within 25 Points of Stockfish")
+plt.xlabel("Iterations (Millions)")
+plt.ylabel("Percentage")
+plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])
+plt.yticks(ticks=plt.yticks()[0], labels=[f'{int(y * 100)}%' for y in plt.yticks()[0]])
+plt.xlim(left=0)
+plt.show()
+
+plt.plot(linear_model.eval_iters, linear_model.percentWithinCorrectBin)
+plt.title("Polynomial Regression Percentage of Cases Our Model's Predictions Are Within the Correct Bin")
 plt.xlabel("Iterations (Millions)")
 plt.ylabel("Percentage")
 plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])

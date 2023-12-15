@@ -473,6 +473,23 @@ def relative_pieces_attacked_evaluator(BOARD, player='white'):
     else:
         return pieces_attacked_evaluator(BOARD, player='black') - pieces_attacked_evaluator(BOARD, player='white')
 
+
+
+def polynomial_regression_evaluator(BOARD, player='white'):
+    means = [1.0350356884392162, 15.536244607710973, 0.11867009124320642, -0.003218345134878177, -0.04553362376012828]
+    std_dev = [178.21313011976932, 54.55478674970564, 1.6859150039299435, 0.8415538503389417, -0.04553362376012828]
+
+    weights = [28.072849893434462, 68.43825096236954, 50.537136169363045, 25.784449780111427, 49.461415860135645,
+               18.350290002998786]
+    evaluationFunctions = [relative_simple_material_evaluator, relative_tapered_piece_squares_evaluator, relative_king_safety_evaluator,
+                           relative_simple_piece_count_evaluator, relative_pieces_attacked_evaluator]
+    score = 0
+    for i in range(len(evaluationFunctions)):
+        score += ((evaluationFunctions[i](BOARD, player) - means[i]) / std_dev[i]) * weights[i]
+
+    return score
+
+
 '''initializeStockfishEngine()
 fen = "rnbqkbnr/1ppppppp/p7/8/8/6P1/PPPPPP1P/RNBQKBNR"
 BOARD = chess.Board(fen)
