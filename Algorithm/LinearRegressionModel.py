@@ -5,7 +5,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import csv
+import matplotlib.ticker as ticker
 
+# Standardization  technique suggested by chat GTP
+def standardization(feature):
+    mean = np.mean(feature)
+    std_dev = np.std(feature)
+    standardized_feature = (feature - mean) / std_dev
+    return standardized_feature
 
 def get_all_samples():
     boards = []
@@ -28,9 +35,14 @@ def get_all_samples():
             features.append(featureRow)
             targets.append(target)
 
+    #feature scaling done with help from chatgpt
+    featureArray = np.array(features)
+    scaledFeatureArray = np.array([standardization(feature) for feature in featureArray.T])
+    scaledFeatures = scaledFeatureArray.T
 
-    print("numberOfBadValues", numberOfBadValues)
-    return boards, features, targets
+
+    #print("numberOfBadValues", numberOfBadValues)
+    return boards, scaledFeatures.tolist(), targets
 
 class PolynomialRegressionModel():
     """
@@ -55,6 +67,8 @@ class PolynomialRegressionModel():
         # These are used to store the numbers needed to graph the loss over the iterations.
         self.eval_iters = []  # stores the iteration index number
         self.losses = []  # stores the loss at the iteration index number with the same list index as in eval_iters
+        self.percentWinningPositionsIdentified = []
+        self.percentWithinTenPoints = []
 
     def get_features(self, x):
         "*** YOUR CODE HERE ***"
@@ -70,7 +84,6 @@ class PolynomialRegressionModel():
     def hypothesis(self, x):
         "*** YOUR CODE HERE ***"
         # https://www.geeksforgeeks.org/python-multiply-two-list/
-        print(self.get_features(x))
         prediction = sum([self.get_features(x)[i] * self.get_weights()[i] for i in range(self.degree + 1)])
 
         return prediction
@@ -80,6 +93,9 @@ class PolynomialRegressionModel():
 
     def loss(self, x, y):
         "*** YOUR CODE HERE ***"
+        #print("lossweights", self.get_weights())
+        #print("self.hypothesis(x)", self.hypothesis(x))
+        #print("y", y)
         return (self.hypothesis(x) - y) ** 2
 
     def gradient(self, x, y):
@@ -90,76 +106,116 @@ class PolynomialRegressionModel():
 
         return gradientValues
 
-    def train(self, evalset=None):
+    def train(self, regularization_strength=0.0):
         xBoards, xFeatures, ySamples = get_all_samples()
-        numberOfSamples = len(ySamples)
 
-        numberOfIterations = 100000
-        numberOfLossSamples = 100
-        numberOfTestingDataPoints = 1000
+        testingXBoards = []
+        testingxFeatures = []
+        testingYSamples = []
+        numberOfTestingDataPoints = 2000
 
-        #https://stackoverflow.com/questions/33626623/the-most-efficient-way-to-remove-first-n-elements-in-a-list
+        random.seed(42)
+        for i in range(numberOfTestingDataPoints):
+            index = random.randrange(0, len(xBoards), 1)
+            testingXBoards.append(xBoards.pop(index))
+            testingxFeatures.append(xFeatures.pop(index))
+            testingYSamples.append(ySamples.pop(index))
+
+        random.seed()
+
+        '''#https://stackoverflow.com/questions/33626623/the-most-efficient-way-to-remove-first-n-elements-in-a-list
         testingXBoards = xBoards[:numberOfTestingDataPoints]
         xBoards = xBoards[numberOfTestingDataPoints:]
         testingxFeatures = xFeatures[:numberOfTestingDataPoints]
         xFeatures = xFeatures[numberOfTestingDataPoints:]
         testingYSamples = ySamples[:numberOfTestingDataPoints]
-        ySamples = ySamples[numberOfTestingDataPoints:]
+        ySamples = ySamples[numberOfTestingDataPoints:]'''
 
-
+        numberOfLossSamples = 400
+        epocs = 10
+        iterationsPerEpoc = len(ySamples)
+        numberOfIterations = epocs * iterationsPerEpoc
 
         # https://www.learndatasci.com/solutions/python-double-slash-operator-floor-division/#:~:text=In%20Python%2C%20we%20can%20perform,floor()%20function.
         lossStepSize = numberOfIterations // numberOfLossSamples
-        for i in range(numberOfIterations):
 
-            currentX = xBoards[i]
-            currentFeatures = xFeatures[i]
-            currentY = ySamples[i]
+        iterations = 0
+        for epoc in range(epocs):
+            for i in range(iterationsPerEpoc):
 
-            self.features[1] = lambda board: currentFeatures[0]
-            self.features[2] = lambda board: currentFeatures[1]
-            self.features[3] = lambda board: currentFeatures[2]
-            self.features[4] = lambda board: currentFeatures[3]
-            self.features[5] = lambda board: currentFeatures[4]
+                currentX = xBoards[i]
+                currentFeatures = xFeatures[i]
+                currentY = ySamples[i]
 
-            newWeights = []
+                self.features[1] = lambda board: currentFeatures[0]
+                self.features[2] = lambda board: currentFeatures[1]
+                self.features[3] = lambda board: currentFeatures[2]
+                self.features[4] = lambda board: currentFeatures[3]
+                self.features[5] = lambda board: currentFeatures[4]
 
-            gradientValues = self.gradient(currentX, currentY)
+                newWeights = []
 
-            for j in range(len(self.weights)):
-                newWeights.append(self.weights[j] - self.learningRate * gradientValues[j])  # check here
+                gradientValues = self.gradient(currentX, currentY)
 
-            self.weights = newWeights
+                for j in range(len(self.weights)):
+                    #print("weights", self.get_weights())
+                    #newWeights.append(self.weights[j] - self.learningRate * gradientValues[j])  # check here
+                    regularization_term = regularization_strength * (self.get_weights()[j] ** 2)
+                    regularized_gradient = gradientValues[j] + regularization_term
+                    newWeights.append(
+                        self.weights[j] - self.learningRate * regularized_gradient
+                    )
 
-            # calculate and store loss
-            if i % lossStepSize == 0:
-                totalLose = 0
-                for sample in range(numberOfTestingDataPoints):
-                    currentTestingFeatures = testingxFeatures[sample]
-                    self.features[1] = lambda board: currentTestingFeatures[0]
-                    self.features[2] = lambda board: currentTestingFeatures[1]
-                    self.features[3] = lambda board: currentTestingFeatures[2]
-                    self.features[4] = lambda board: currentTestingFeatures[3]
-                    self.features[5] = lambda board: currentTestingFeatures[4]
+                self.weights = newWeights
 
-                    totalLose += self.loss(testingXBoards[sample], testingYSamples[sample])
+                # calculate and store loss
+                if i % lossStepSize == 0:
 
-                self.eval_iters.append(i)
-                self.losses.append(totalLose / numberOfTestingDataPoints)
+                    totalLose = 0
+                    winningPositionsIdentified = 0
+                    withinTenPoints = 0
+                    for sample in range(numberOfTestingDataPoints):
+                        currentTestingFeatures = testingxFeatures[sample]
+                        self.features[1] = lambda board: currentTestingFeatures[0]
+                        self.features[2] = lambda board: currentTestingFeatures[1]
+                        self.features[3] = lambda board: currentTestingFeatures[2]
+                        self.features[4] = lambda board: currentTestingFeatures[3]
+                        self.features[5] = lambda board: currentTestingFeatures[4]
+
+                        totalLose += self.loss(testingXBoards[sample], testingYSamples[sample])
+
+                        if self.hypothesis(sample) >= 0 and testingYSamples[sample] >= 0 or \
+                            self.hypothesis(sample) < 0 and testingYSamples[sample] < 0:
+                            winningPositionsIdentified += 1
+
+                        if abs(self.hypothesis(sample) - testingYSamples[sample]) <= 25:
+                            withinTenPoints += 1
 
 
-            elif i % 1000 == 0:
-                print("i = ", 1)
-                print("weights = ", self.get_weights())
+                    self.eval_iters.append(iterations)
+                    self.losses.append(totalLose / numberOfTestingDataPoints)
+                    self.percentWinningPositionsIdentified.append(winningPositionsIdentified / numberOfTestingDataPoints)
+                    self.percentWithinTenPoints.append(withinTenPoints / numberOfTestingDataPoints)
 
+                iterations += 1
 
         return self.weights
 
 
 
-def plot_loss_curve(self, eval_iters, losses, title = None):
+def plot_loss_curve(eval_iters, losses, title = None):
     plt.plot(eval_iters, losses)
-    plt.xlabel("Iterations")
+
+    # Calculate the step size for tick marks to have 1 decimal point in millions
+    #step_size = round((x_max - x_min) / 5e6, 1)  # Adjust 5e6 to control the number of ticks
+
+    # Set the x-axis tick labels to display values in millions with one decimal point
+    plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])
+
+    #plt.xticks(ticks=plt.xticks()[0], labels=[f'{int(x / 1000000)}M' for x in plt.xticks()[0]])
+    plt.xlim(left=0)
+
+    plt.xlabel("Iterations (Millions)")
     plt.ylabel("Loss")
     if title is not None:
         plt.title(title)
@@ -168,41 +224,29 @@ def plot_loss_curve(self, eval_iters, losses, title = None):
 
 
 
-linear_model = PolynomialRegressionModel(learning_rate=10 ** -4)
-print("Q2a weights", linear_model.train())
+linear_model = PolynomialRegressionModel(learning_rate=5 * 10 ** -7)
+print("Weights", linear_model.train())
 
 
 # part b
-plot_loss_curve(linear_model.eval_iters, linear_model.losses, "Q2b Loss curve")
+plot_loss_curve(linear_model.eval_iters, linear_model.losses, "Polynomial Regression Loss curve")
 
+plt.plot(linear_model.eval_iters, linear_model.percentWinningPositionsIdentified)
+plt.title("Polynomial Regression Percentage of Cases Our Model and Stockfish Agree on Who Is Winning")
+plt.xlabel("Iterations (Millions)")
+plt.ylabel("Percentage")
+plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])
+plt.yticks(ticks=plt.yticks()[0], labels=[f'{int(y * 100)}%' for y in plt.yticks()[0]])
+plt.xlim(left=0)
+plt.show()
 
-'''# part c
-    allSolutions = []
-    sine_val = util.get_dataset("sine_val")
+plt.plot(linear_model.eval_iters, linear_model.percentWithinTenPoints)
+plt.title("Polynomial Regression Percentage of Cases Our Model's Score is Within 25 Points of Stockfish")
+plt.xlabel("Iterations (Millions)")
+plt.ylabel("Percentage")
+plt.xticks(ticks=plt.xticks()[0], labels=[f'{x / 1e6:.1f}M' for x in plt.xticks()[0]])
+plt.yticks(ticks=plt.yticks()[0], labels=[f'{int(y * 100)}%' for y in plt.yticks()[0]])
+plt.xlim(left=0)
+plt.show()
 
-    learningRates = [10 ** -8, 10 ** -7, 10 ** -6, 10 ** -5, 10 ** -4]
-
-    for learningRate in learningRates:
-        for degreeNum in range(1, 3, 1):
-            individualSolution = []
-
-            currentModel = PolynomialRegressionModel(degree=degreeNum, learning_rate=learningRate)
-
-            sine_val.compute_average_loss(currentModel)
-
-            individualSolution.append("Q2c Weights: ")
-            individualSolution.append(currentModel.train(sine_train))
-            individualSolution.append("Average Loss: ")
-            individualSolution.append(sine_val.compute_average_loss(currentModel))
-            individualSolution.append("degreeNum: ")
-            individualSolution.append(degreeNum)
-            individualSolution.append("learningRate: ")
-            individualSolution.append(learningRate)
-
-            allSolutions.append(individualSolution)
-
-    # sorting technique suggested by chatgpt
-    sortedSolutions = sorted(allSolutions, key=lambda x: x[3])
-    for solution in sortedSolutions:
-        print(solution)'''
 
