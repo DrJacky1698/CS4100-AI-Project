@@ -6,6 +6,26 @@ import argparse
 from ChessEngine import chess_visuals as chess_visuals
 from Algorithm.MinMax import play_min_max
 from Algorithm.Negamax import play_nega_max
+from Algorithm.EvaluationFunctions import (simple_material_evaluator, 
+                                           relative_simple_material_evaluator, 
+                                           stockfish_evaluator, 
+                                           basic_piece_squares_and_material_evaluator, 
+                                           relative_basic_piece_squares_and_material_evaluator, 
+                                           tapered_piece_squares_evaluator, 
+                                           relative_tapered_piece_squares_evaluator, 
+                                           king_safety_evaluator, 
+                                           relative_king_safety_evaluator, 
+                                           simple_piece_count_evaluator, 
+                                           relative_simple_piece_count_evaluator, 
+                                           pieces_attacked_evaluator, 
+                                           relative_pieces_attacked_evaluator, 
+                                           polynomial_regression_evaluator, 
+                                           relative_polynomial_regression_evaluator, 
+                                           random_forest_classifier_evaluator, 
+                                           relative_random_forest_classifier_evaluator, 
+                                           random_forest_regression_evaluator, 
+                                           relative_random_forest_regression_evaluator, 
+                                           initializeStockfishEngine, closeStockfishEngine)
 
 scrn = chess_visuals.scrn
 board = chess_visuals.board
@@ -239,6 +259,8 @@ def main():
     parser.add_argument("mode", nargs='?', default='two_agents', help="Game mode: 'human', 'one_agent', or 'two_agents'")
     parser.add_argument("--agent1", help="First AI agent: 'min_max' or 'nega_max'", default="min_max")
     parser.add_argument("--agent2", help="Second AI agent: 'min_max' or 'nega_max' (only for two_agents mode)", default="min_max")
+    parser.add_argument("--evaluator1", help="Evaluator for the first AI agent", default="relative_simple_material_evaluator")
+    parser.add_argument("--evaluator2", help="Evaluator for the second AI agent (only for two_agents mode)", default="relative_simple_material_evaluator")
     parser.add_argument("--agent_color", help="AI agent color: 'white' or 'black' (only for one_agent mode)", default="white")
     args = parser.parse_args()
 
@@ -251,15 +273,42 @@ def main():
         "nega_max": play_nega_max
     }
 
+    evaluator_mapping = {
+        "simple_material_evaluator": simple_material_evaluator,
+        "relative_simple_material_evaluator": relative_simple_material_evaluator,
+        "stockfish_evaluator": stockfish_evaluator,
+        "basic_piece_squares_and_material_evaluator": basic_piece_squares_and_material_evaluator,
+        "relative_basic_piece_squares_and_material_evaluator": relative_basic_piece_squares_and_material_evaluator,
+        "tapered_piece_squares_evaluator": tapered_piece_squares_evaluator,
+        "relative_tapered_piece_squares_evaluator": relative_tapered_piece_squares_evaluator,
+        "king_safety_evaluator": king_safety_evaluator,
+        "relative_king_safety_evaluator": relative_king_safety_evaluator,
+        "simple_piece_count_evaluator": simple_piece_count_evaluator,
+        "relative_simple_piece_count_evaluator": relative_simple_piece_count_evaluator,
+        "pieces_attacked_evaluator": pieces_attacked_evaluator,
+        "relative_pieces_attacked_evaluator": relative_pieces_attacked_evaluator,
+        "polynomial_regression_evaluator": polynomial_regression_evaluator,
+        "relative_polynomial_regression_evaluator": relative_polynomial_regression_evaluator,
+        "random_forest_classifier_evaluator": random_forest_classifier_evaluator,
+        "relative_random_forest_classifier_evaluator": relative_random_forest_classifier_evaluator,
+        "random_forest_regression_evaluator": random_forest_regression_evaluator,
+        "relative_random_forest_regression_evaluator": relative_random_forest_regression_evaluator
+    }
+
+
     # Convert agent_color to boolean
     agent_color_bool = args.agent_color.lower() == 'white'
+
+    evaluator1 = evaluator_mapping.get(args.evaluator1, relative_simple_material_evaluator)
+    evaluator2 = evaluator_mapping.get(args.evaluator2, relative_simple_material_evaluator)
 
     if args.mode == 'human':
         main_human_vs_human(board)
     elif args.mode == 'one_agent':
-        main_one_agent(board, agent_mapping[args.agent1], agent_color_bool)
+        agent_color_bool = args.agent_color.lower() == 'white'
+        main_one_agent(board, agent_mapping[args.agent1], agent_color_bool, evaluator1)
     elif args.mode == 'two_agents':
-        main_two_agent(board, agent_mapping[args.agent1], True, agent_mapping[args.agent2])
+        main_two_agent(board, agent_mapping[args.agent1], evaluator1, agent_mapping[args.agent2], evaluator2)
     else:
         print("Invalid game mode. Please choose 'human', 'one_agent', or 'two_agents'.")
 
