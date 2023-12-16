@@ -8,12 +8,15 @@ import joblib
 
 engine = False
 
-'''Use the relative evaluators instead. The relative .......'''
 
 '''All evaluation functions take in a "player" parameter and return a number corresponding to how good
- that player's position is. If you need to compare it to the position of the other player or to find out
+ that player's position is in absolute terms, where higher is better. If you need to compare it to the position of the other player or to find out
   which player currently has an advantage, call the evaluation function being used twice, once for each player's
-   perspective and then compare them.'''
+ perspective and then compare them. Or better yet use the relative evaluation version.'''
+
+'''Use the relative evaluators instead return a an evaluation relative to the opponent's on evaluation. 
+See report for more details about purpose and design considerations.'''
+
 
 
 #simple evaluation function which improves on the one from the tutorial we found in minmax.py by making a bishop
@@ -477,7 +480,7 @@ def relative_pieces_attacked_evaluator(BOARD, player='white'):
         return pieces_attacked_evaluator(BOARD, player='black') - pieces_attacked_evaluator(BOARD, player='white')
 
 
-
+"""Uses the weights from the polynomial regression model to create an evaluator."""
 def polynomial_regression_evaluator(BOARD, player='white'):
     means = [1.0350356884392162, 15.536244607710973, 0.11867009124320642, -0.003218345134878177, -0.04553362376012828]
     std_dev = [178.21313011976932, 54.55478674970564, 1.6859150039299435, 0.8415538503389417, -0.04553362376012828]
@@ -499,7 +502,7 @@ def relative_polynomial_regression_evaluator(BOARD, player='white'):
     else:
         return polynomial_regression_evaluator(BOARD, player='black') - polynomial_regression_evaluator(BOARD, player='white')
 
-
+'''Uses the result of the random forest classifier to create an evaluator.'''
 def random_forest_classifier_evaluator(BOARD, player='white'):
     classifier_loaded = joblib.load('trained_random_forest_classifier.joblib')
     print("Random forest classifier model loaded successfully as an evaluator.")
@@ -542,7 +545,7 @@ def relative_random_forest_classifier_evaluator(BOARD, player='white'):
     else:
         return random_forest_classifier_evaluator(BOARD, player='black') - random_forest_classifier_evaluator(BOARD, player='white')
     
-
+'''Uses the result of the random forest regression model to create an evaluator.'''
 def random_forest_regression_evaluator(BOARD, player='white'):
     regressor_loaded = joblib.load('trained_random_forest_regressor.joblib')
     print("Random forest regression model loaded successfully as an evaluator.")
@@ -569,18 +572,5 @@ def relative_random_forest_regression_evaluator(BOARD, player='white'):
         return random_forest_regression_evaluator(BOARD, player='white') - random_forest_regression_evaluator(BOARD, player='black')
     else:
         return random_forest_regression_evaluator(BOARD, player='black') - random_forest_regression_evaluator(BOARD, player='white')
-
-# initializeStockfishEngine()
-#fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR"
-#BOARD = chess.Board(fen)
-
-#print(relative_polynomial_regression_evaluator(BOARD, player='white'))
-#print(relative_polynomial_regression_evaluator(BOARD, player='black'))
-
-#print(relative_random_forest_regression_evaluator(BOARD, player='white'))
-#print(relative_random_forest_regression_evaluator(BOARD, player='black'))
-#print(relative_random_forest_classifier_evaluator(BOARD, player='white'))
-#print(relative_random_forest_classifier_evaluator(BOARD, player='black'))
-# closeStockfishEngine()
 
 
