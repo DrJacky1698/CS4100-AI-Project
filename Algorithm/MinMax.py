@@ -38,6 +38,5 @@ class MinMax:
         _, best_move = self.min_max(board, depth, player_color)
         return best_move
 
-def play_min_max(board, evaluator):
-    minmax = MinMax(evaluator)
-    return minmax.select_move(board)
+def play_min_max(evaluator):
+    return MinMax(evaluator)

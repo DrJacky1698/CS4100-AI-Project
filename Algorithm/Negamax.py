@@ -2,14 +2,14 @@ import chess
 from Algorithm.EvaluationFunctions import *
 
 class NegaMax:
-    def __init__(self, search_depth=6, evaluation_function=simple_material_evaluator, player='white'):
+    def __init__(self, evaluation_function=simple_material_evaluator, search_depth=3):
         self.search_depth = search_depth
         self.evaluation_function = evaluation_function
-        self.player = player
 
     def run_negamax(self, current_board, depth_remaining, alpha, beta):
+        player_color = "white" if current_board.turn == chess.WHITE else "black"
         if depth_remaining == 0 or current_board.is_game_over():
-            return self.evaluation_function(current_board, self.player)
+            return self.evaluation_function(current_board, player_color)
 
         maximum_evaluation = float('-inf')
         for potential_move in current_board.legal_moves:
@@ -22,7 +22,7 @@ class NegaMax:
                 break
         return maximum_evaluation
 
-    def find_best_move(self, board):
+    def select_move(self, board):
         optimal_move = None
         highest_value = float('-inf')
         for move in board.legal_moves:
@@ -32,9 +32,10 @@ class NegaMax:
             if move_evaluation > highest_value:
                 highest_value = move_evaluation
                 optimal_move = move
-                return optimal_move
+        return optimal_move
 
     
-def play_nega_max(current_board, search_depth=3, evaluation_function=relative_pieces_attacked_evaluator, player='white'):
-    negamax = NegaMax(search_depth, evaluation_function, player)
-    return negamax.find_best_move(current_board)
+def play_nega_max(evaluation_function=relative_pieces_attacked_evaluator, search_depth=3):
+    # negamax = NegaMax(evaluation_function, search_depth)
+    # return negamax.select_move(current_board)
+    return NegaMax(evaluation_function, search_depth)
