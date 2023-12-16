@@ -501,7 +501,7 @@ def relative_polynomial_regression_evaluator(BOARD, player='white'):
 
 
 def random_forest_classifier_evaluator(BOARD, player='white'):
-    classifier_loaded = joblib.load('Algorithm/trained_random_forest_classifier.joblib')
+    classifier_loaded = joblib.load('trained_random_forest_classifier.joblib')
     print("Random forest classifier model loaded successfully as an evaluator.")
 
     # If the player is black, mirror the board to analyze it as white
@@ -544,7 +544,7 @@ def relative_random_forest_classifier_evaluator(BOARD, player='white'):
     
 
 def random_forest_regression_evaluator(BOARD, player='white'):
-    regressor_loaded = joblib.load('Algorithm/trained_random_forest_regressor.joblib')
+    regressor_loaded = joblib.load('trained_random_forest_regressor.joblib')
     print("Random forest regression model loaded successfully as an evaluator.")
 
      # If the player is black, mirror the board to analyze it as white
