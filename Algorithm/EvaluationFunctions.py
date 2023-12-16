@@ -47,8 +47,8 @@ def relative_simple_material_evaluator(BOARD, player):
 
 def initializeStockfishEngine():
     global engine
-    #engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_simon")
-    engine = chess.engine.SimpleEngine.popen_uci("stockfish")
+    #engine = chess.engine.SimpleEngine.popen_uci("Algorithm/stockfish_intel")
+    engine = chess.engine.SimpleEngine.popen_uci("stockfish_arm")
 
 
 def closeStockfishEngine():
